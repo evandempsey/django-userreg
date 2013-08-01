@@ -1,0 +1,13 @@
+# Add these variables to your settings.py
+
+ACCOUNT_KEY_SALT = "abcd123"
+DEFAULT_REGISTRATION_KEY_VALID_DAYS = 30
+DEFAULT_RECOVERY_KEY_VALID_DAYS = 2
+DEFAULT_DEACTIVATION_KEY_VALID_DAYS = 2
+EMAIL_ADDRESS_ACTIVATE_ACCOUNT = "activate-account@test.com"
+EMAIL_ADDRESS_RECOVER_PASSWORD = "recover-password@test.com"
+EMAIL_ADDRESS_DEACTIVATE_ACCOUNT = "deactivate-account@test.com"
+
+SITE_URL = "/"
+LOGIN_REDIRECT_URL = "/home/"
+LOGOUT_REDIRECT_URL = "/"
