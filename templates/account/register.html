@@ -2,14 +2,13 @@
         "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Recovery Email Sent</title>
+    <title>Register</title>
 </head>
 <body>
 
-<h1>Recovery Email Sent</h1>
-<p>Please check your mail.</p>
+<h1>Register</h1>
 
-<form method="POST" action="{% url account.views.register %}">
+<form method="POST" action="{% url "account.views.register" %}">
     {% csrf_token %}
 
     {% if form.non_field_errors %}

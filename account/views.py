@@ -95,7 +95,7 @@ def register(request):
             activationEmail.send()
 
             return render_to_response("account/registration_complete.html",
-                {},
+                                      {},
                                       context_instance=RequestContext(request))
 
     # If there is no POST data, send blank registration form.
@@ -219,7 +219,7 @@ def requestDeactivation(request):
         form = DeactivationForm(request.POST)
 
         if form.is_valid() \
-            and request.user.username == form.cleaned_data["username"]:
+                and request.user.username == form.cleaned_data["username"]:
             # Send deactivation email
             user = User.objects.get(username=form.cleaned_data["username"])
             emailManager = EmailManager(user)

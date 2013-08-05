@@ -7,9 +7,9 @@
 <body>
 
 <h1>Log In</h1>
-<p><a href="{% url account.views.requestRecovery %}">Forgot password?</a></p>
+<p><a href="{% url "account.views.requestRecovery" %}">Forgot password?</a></p>
 
-<form method="POST" action="{% url account.views.authenticateUser %}">
+<form method="POST" action="{% url "account.views.authenticateUser" %}">
     {% csrf_token %}
 
     {% for error in errors %}

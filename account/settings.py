@@ -9,5 +9,6 @@ EMAIL_ADDRESS_RECOVER_PASSWORD = "recover-password@test.com"
 EMAIL_ADDRESS_DEACTIVATE_ACCOUNT = "deactivate-account@test.com"
 
 SITE_URL = "/"
+LOGIN_URL = "/account/login/"
 LOGIN_REDIRECT_URL = "/home/"
 LOGOUT_REDIRECT_URL = "/"
