@@ -5,7 +5,7 @@ An account registration and management app for Django.
 
 Installation is simple. Just add 'account' to the INSTALLED_APPS tuple in your settings.py and provide your own values for the following variables.
 
-# Add these variables to your settings.py
+Add these variables to your settings.py
 
 ACCOUNT_KEY_SALT = "abcd123"
 DEFAULT_REGISTRATION_KEY_VALID_DAYS = 30
