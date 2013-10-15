@@ -8,7 +8,7 @@
 
 <h1>Deactivate Account</h1>
 
-<form method="POST" action="{% url "account.views.requestDeactivation" %}">
+<form method="POST" action="{% url "account.views.request_account_deactivation" %}">
     {% csrf_token %}
 
     {% if form.non_field_errors %}

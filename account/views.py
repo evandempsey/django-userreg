@@ -13,10 +13,13 @@ from accountemailmanager import AccountEmailManager as EmailManager
 from settings import SITE_URL, LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL
 
 
-def authenticateUser(request):
+def login_user(request):
     """
     Authenticate the user
     """
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(LOGIN_REDIRECT_URL);
+
     params = {"errors": []}
 
     if request.method == "POST":
@@ -37,7 +40,8 @@ def authenticateUser(request):
                               context_instance=RequestContext(request))
 
 
-def deauthenticateUser(request):
+@login_required
+def logout_user(request):
     """
     Log out the user.
     """
@@ -46,7 +50,7 @@ def deauthenticateUser(request):
 
 
 @login_required
-def password(request):
+def change_password(request):
     """
     Change the user's password.
     """
@@ -90,9 +94,9 @@ def register(request):
             user.save()
 
             # Send activation email
-            emailManager = EmailManager(user)
-            activationEmail = emailManager.activationEmail()
-            activationEmail.send()
+            email_manager = EmailManager(user)
+            activation_email = email_manager.generate_activation_email()
+            activation_email.send()
 
             return render_to_response("account/registration_complete.html",
                                       {},
@@ -107,7 +111,7 @@ def register(request):
                               context_instance=RequestContext(request))
 
 
-def requestRecovery(request):
+def request_recovery(request):
     """
     Accept email address from user and send recovery email.
     """
@@ -118,9 +122,9 @@ def requestRecovery(request):
         if form.is_valid():
             # Send recovery email.
             user = User.objects.get(email=form.cleaned_data["email"])
-            emailManager = EmailManager(user)
-            recoveryEmail = emailManager.recoveryEmail()
-            recoveryEmail.send()
+            email_manager = EmailManager(user)
+            recovery_email = email_manager.generate_recovery_email()
+            recovery_email.send()
             return render_to_response("account/recovery_email_sent.html",
                                       context_instance=RequestContext(request))
 
@@ -134,7 +138,7 @@ def requestRecovery(request):
                               context_instance=RequestContext(request))
 
 
-def recover(request, username, key):
+def recover_account(request, username, key):
     """
     Recover an account.
     """
@@ -146,10 +150,10 @@ def recover(request, username, key):
 
     # Check if that user has an unused, unexpired recovery key.
     try:
-        recoveryKey = RecoveryKey.objects.get(user=user,
-                                              key=key,
-                                              used=False,
-                                              expires__gte=datetime.today())
+        recovery_key = RecoveryKey.objects.get(user=user,
+                                               key=key,
+                                               used=False,
+                                               expires__gte=datetime.today())
     except RecoveryKey.DoesNotExist:
         return HttpResponseRedirect(SITE_URL)
 
@@ -163,8 +167,8 @@ def recover(request, username, key):
         if form.is_valid():
             user.set_password(form.cleaned_data["password1"])
             user.save()
-            recoveryKey.used = True
-            recoveryKey.save()
+            recovery_key.used = True
+            recovery_key.save()
             return render_to_response("account/password_reset.html",
                                       context_instance=RequestContext(request))
     else:
@@ -178,7 +182,7 @@ def recover(request, username, key):
                               context_instance=RequestContext(request))
 
 
-def activate(request, username, key):
+def activate_account(request, username, key):
     """
     Activate a new account.
     """
@@ -188,7 +192,7 @@ def activate(request, username, key):
     except User.DoesNotExist:
         return HttpResponseRedirect(SITE_URL)
 
-    # Check for a good activation key.
+    # Check for a valid activation key.
     try:
         key = ActivationKey.objects.get(user=user,
                                         key=key,
@@ -205,13 +209,13 @@ def activate(request, username, key):
     key.used = True
     key.save()
 
-    # Tell the motherfucking user. They dig that.
+    # Tell the user.
     return render_to_response("account/account_activated.html",
                               context_instance=RequestContext(request))
 
 
 @login_required
-def requestDeactivation(request):
+def request_account_deactivation(request):
     """
     Prompt user for credentials and send deactivation email.
     """
@@ -222,9 +226,9 @@ def requestDeactivation(request):
                 and request.user.username == form.cleaned_data["username"]:
             # Send deactivation email
             user = User.objects.get(username=form.cleaned_data["username"])
-            emailManager = EmailManager(user)
-            deactivationEmail = emailManager.deactivationEmail()
-            deactivationEmail.send()
+            email_manager = EmailManager(user)
+            deactivation_email = email_manager.generate_deactivation_email()
+            deactivation_email.send()
 
             return render_to_response("account/deactivation_email_sent.html",
                                       context_instance=RequestContext(request))
@@ -238,11 +242,10 @@ def requestDeactivation(request):
                               context_instance=RequestContext(request))
 
 
-def deactivate(request, username=None, key=None):
+def deactivate_account(request, username=None, key=None):
     """
     Deactivate an account.
     """
-
     # First check if that user exists.
     try:
         user = User.objects.get(username=username)
@@ -274,7 +277,7 @@ def deactivate(request, username=None, key=None):
 
 
 @login_required
-def manageAccount(request):
+def manage_account(request):
     """
     Account management page.
     """

@@ -22,20 +22,19 @@ class BaseEmailManager(object):
         """
         self.owner = user
 
-    def renderHTMLEmail(self, template, params):
+    def render_HTML_email(self, template, params):
         """
         Renders a HTML email body given a template
         filename and a dictionary of parameters.
         """
         html = get_template(template)
         context = Context(params)
-        body = html.render(context)
-        return body
+        return html.render(context)
 
-    def generateHash(self):
+    def generate_hash(self):
         """
         Generate a hash from the username
         and the current time.
         """
-        stringToHash = self.owner.username + str(datetime.now()) + ACCOUNT_KEY_SALT
-        return sha256(stringToHash).hexdigest()
+        string_to_hash = self.owner.username + str(datetime.now()) + ACCOUNT_KEY_SALT
+        return sha256(string_to_hash).hexdigest()

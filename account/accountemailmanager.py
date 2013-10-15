@@ -2,7 +2,7 @@
 # Single class to generate and send emails
 # relating to account management.
 # Author: Evan Dempsey
-# Last Modified: 01/Aug/2013
+# Last Modified: 15/Oct/2013
 
 from datetime import datetime, timedelta
 from django.core.mail import EmailMessage
@@ -15,86 +15,86 @@ from settings import DEFAULT_REGISTRATION_KEY_VALID_DAYS, DEFAULT_RECOVERY_KEY_V
 
 
 class AccountEmailManager(BaseEmailManager):
-    def activationEmail(self):
+    def generate_activation_email(self):
         """
         Generate an authorization email.
         """
         # Allow CONSTANT days for activation.
-        expiryDate = datetime.today() + timedelta(days=DEFAULT_REGISTRATION_KEY_VALID_DAYS)
+        expiry_date = datetime.today() + timedelta(days=DEFAULT_REGISTRATION_KEY_VALID_DAYS)
 
         # Generate key and create ActivationKey object.
-        activationKey = ActivationKey(user=self.owner,
-                                      key=self.generateHash(),
+        activation_key = ActivationKey(user=self.owner,
+                                      key=self.generate_hash(),
                                       used=False,
-                                      expires=expiryDate)
-        activationKey.save()
+                                      expires=expiry_date)
+        activation_key.save()
 
         # Set up template parameters
         templateFile = "account/email/activation_email.html"
         params = {"username": self.owner.username,
-                  "key": activationKey.key}
+                  "key": activation_key.key}
 
         # Make EmailMessage instance
-        emailSubject = "Activate your account."
-        emailFrom = EMAIL_ADDRESS_ACTIVATE_ACCOUNT
-        emailBody = self.renderHTMLEmail(templateFile, params)
-        email = EmailMessage(emailSubject, emailBody,
-                             emailFrom, [self.owner.email])
+        email_subject = "Activate your account."
+        email_from = EMAIL_ADDRESS_ACTIVATE_ACCOUNT
+        email_body = self.render_HTML_email(templateFile, params)
+        email = EmailMessage(email_subject, email_body,
+                             email_from, [self.owner.email])
 
         return email
 
-    def recoveryEmail(self):
+    def generate_recovery_email(self):
         """
         Generate a password recovery email.
         """
         # Allow CONSTANT days for activation.
-        expiryDate = datetime.today() + timedelta(days=DEFAULT_RECOVERY_KEY_VALID_DAYS)
+        expiry_date = datetime.today() + timedelta(days=DEFAULT_RECOVERY_KEY_VALID_DAYS)
 
         # Generate key and create ActivationKey object.
-        recoveryKey = RecoveryKey(user=self.owner,
-                                  key=self.generateHash(),
-                                  used=False,
-                                  expires=expiryDate)
-        recoveryKey.save()
+        recovery_key = RecoveryKey(user=self.owner,
+                                   key=self.generate_hash(),
+                                   used=False,
+                                   expires=expiry_date)
+        recovery_key.save()
 
         # Set up template parameters
-        templateFile = "account/email/recovery_email.html"
+        template_file = "account/email/recovery_email.html"
         params = {"username": self.owner.username,
-                  "key": recoveryKey.key}
+                  "key": recovery_key.key}
 
         # Make EmailMessage instance
-        emailSubject = "Reset your password."
-        emailFrom = EMAIL_ADDRESS_RECOVER_PASSWORD
-        emailBody = self.renderHTMLEmail(templateFile, params)
-        email = EmailMessage(emailSubject, emailBody,
-                             emailFrom, [self.owner.email])
+        email_subject = "Reset your password."
+        email_from = EMAIL_ADDRESS_RECOVER_PASSWORD
+        email_body = self.render_HTML_email(template_file, params)
+        email = EmailMessage(email_subject, email_body,
+                             email_from, [self.owner.email])
 
         return email
 
-    def deactivationEmail(self):
+    def generate_deactivation_email(self):
         """
         Generate an account deactivation email.
         """
         # Allow CONSTANT days for deactivation.
-        expiryDate = datetime.today() + timedelta(days=DEFAULT_DEACTIVATION_KEY_VALID_DAYS)
+        expiry_date = datetime.today() + timedelta(days=DEFAULT_DEACTIVATION_KEY_VALID_DAYS)
 
         # Generate key and create DeactivationKey object.
-        deactivationKey = DeactivationKey(user=self.owner,
-                                          key=self.generateHash(),
-                                          used=False,
-                                          expires=expiryDate)
-        deactivationKey.save()
+        deactivation_key = DeactivationKey(user=self.owner,
+                                           key=self.generate_hash(),
+                                           used=False,
+                                           expires=expiry_date)
+        deactivation_key.save()
 
         # Set up template parameters
-        templateFile = "account/email/deactivation_email.html"
+        template_file = "account/email/deactivation_email.html"
         params = {"username": self.owner.username,
-                  "key": deactivationKey.key}
+                  "key": deactivation_key.key}
 
         # Make EmailMessage instance
-        emailSubject = "Deactivate your account."
-        emailFrom = EMAIL_ADDRESS_DEACTIVATE_ACCOUNT
-        emailBody = self.renderHTMLEmail(templateFile, params)
-        email = EmailMessage(emailSubject, emailBody,
-                             emailFrom, [self.owner.email])
+        email_subject = "Deactivate your account."
+        email_from = EMAIL_ADDRESS_DEACTIVATE_ACCOUNT
+        email_body = self.render_HTML_email(template_file, params)
+        email = EmailMessage(email_subject, email_body,
+                             email_from, [self.owner.email])
 
         return email

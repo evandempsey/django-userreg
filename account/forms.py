@@ -37,13 +37,13 @@ class RecoveryForm(forms.Form):
         Make sure the email address is associated with an account.
         """
 
-        errString = "There is no account associated with that email address."
+        error_string = "There is no account associated with that email address."
         email = self.cleaned_data["email"]
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise forms.ValidationError(errString)
+            raise forms.ValidationError(error_string)
 
         return email
 

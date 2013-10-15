@@ -6,21 +6,21 @@ class AccountTest(TestCase):
     Test cases for django views.
     """
 
-    def testLoginPage(self):
+    def test_login_page(self):
         """
         Test that the login page can be loaded.
         """
         response = self.client.get("/account/login/")
         self.assertEqual(response.status_code, 200)
 
-    def testRegistrationPage(self):
+    def test_registration_page(self):
         """
         Test that the registration page can be loaded.
         """
         response = self.client.get("/account/register/")
         self.assertEqual(response.status_code, 200)
 
-    def testRecoveryPage(self):
+    def test_recovery_page(self):
         """
         Test that the registration page can be loaded.
         """
