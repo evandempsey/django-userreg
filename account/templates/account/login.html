@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+        "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Log In</title>
+</head>
+<body>
+
+<h1>Log In</h1>
+<p><a href="{% url 'account.views.request_recovery' %}">Forgot password?</a></p>
+
+<form method="POST" action="{% url 'account.views.login_user' %}">
+    {% csrf_token %}
+
+    {% for error in errors %}
+    <p>{{ error|escape }}</p>
+    {% endfor %}
+
+    <p><input type="text" placeholder="Username" name="username"></p>
+    <p><input type="password" placeholder="Password" name="password"></p>
+    <p><input type="submit" value="submit" /></p>
+</form>
+
+</body>
+</html>

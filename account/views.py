@@ -1,16 +1,24 @@
 from datetime import datetime
 
 from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.template import RequestContext
 
-from models import ActivationKey, RecoveryKey, DeactivationKey
-from forms import RegistrationForm, ChangePasswordForm, RecoveryForm, DeactivationForm, ResetPasswordForm
-from accountemailmanager import AccountEmailManager as EmailManager
-from settings import SITE_URL, LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL
+from models import AuthenticationKey
+from forms import RegistrationForm
+from forms import ChangePasswordForm
+from forms import RecoveryForm
+from forms import DeactivationForm
+from forms import ResetPasswordForm
+from emailmanager import EmailManager
+from settings import LOGIN_REDIRECT_URL
+from settings import LOGOUT_REDIRECT_URL
 
 
 def login_user(request):
@@ -18,7 +26,7 @@ def login_user(request):
     Authenticate the user
     """
     if request.user.is_authenticated():
-        return HttpResponseRedirect(LOGIN_REDIRECT_URL);
+        return HttpResponseRedirect(LOGIN_REDIRECT_URL)
 
     params = {"errors": []}
 
@@ -61,7 +69,7 @@ def change_password(request):
         # If new password is valid, change it and show "changed" page.
         if form.is_valid():
             user = request.user
-            user.set_password(form.cleaned_data["password1"])
+            user.set_password(form.cleaned_data["new_password"])
             user.save()
             return render_to_response("account/password_changed.html",
                                       context_instance=RequestContext(request))
@@ -89,7 +97,7 @@ def register(request):
             # Create user
             user = User.objects.create_user(form.cleaned_data["username"],
                                             form.cleaned_data["email"],
-                                            form.cleaned_data["password1"])
+                                            form.cleaned_data["password"])
             user.is_active = False
             user.save()
 
@@ -143,19 +151,15 @@ def recover_account(request, username, key):
     Recover an account.
     """
     # Check if the username belongs to a real user.
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    user = get_object_or_404(User, username=username)
 
     # Check if that user has an unused, unexpired recovery key.
-    try:
-        recovery_key = RecoveryKey.objects.get(user=user,
-                                               key=key,
-                                               used=False,
-                                               expires__gte=datetime.today())
-    except RecoveryKey.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    recovery_key = get_object_or_404(AuthenticationKey,
+                                     user=user,
+                                     key=key,
+                                     type='r',
+                                     used=False,
+                                     expires__gte=datetime.today())
 
     # If we got this far, things are good so deal with the password change.
     # If there is POST data, try to process it
@@ -165,7 +169,7 @@ def recover_account(request, username, key):
         # If new password is valid, change it and redirect to "changed" page.
         # Also record that the key has been used.
         if form.is_valid():
-            user.set_password(form.cleaned_data["password1"])
+            user.set_password(form.cleaned_data["new_password"])
             user.save()
             recovery_key.used = True
             recovery_key.save()
@@ -187,27 +191,23 @@ def activate_account(request, username, key):
     Activate a new account.
     """
     # Get the user account associated wth the username.
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    user = get_object_or_404(User, username=username)
 
     # Check for a valid activation key.
-    try:
-        key = ActivationKey.objects.get(user=user,
-                                        key=key,
-                                        used=False,
-                                        expires__gte=datetime.today())
-    except ActivationKey.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    activation_key = get_object_or_404(AuthenticationKey,
+                                       user=user,
+                                       key=key,
+                                       type='a',
+                                       used=False,
+                                       expires__gte=datetime.today())
 
     # If we got this far, activate the account.
     user.is_active = True
     user.save()
 
     # Record that the activation key has been used.
-    key.used = True
-    key.save()
+    activation_key.used = True
+    activation_key.save()
 
     # Tell the user.
     return render_to_response("account/account_activated.html",
@@ -247,26 +247,22 @@ def deactivate_account(request, username=None, key=None):
     Deactivate an account.
     """
     # First check if that user exists.
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    user = get_object_or_404(User, username=username)
 
-    # Get activation key for that user.
-    try:
-        key = DeactivationKey.objects.get(user=user,
-                                          key=key,
-                                          used=False,
-                                          expires__gte=datetime.today())
-    except DeactivationKey.DoesNotExist:
-        return HttpResponseRedirect(SITE_URL)
+    # Get deactivation key for that user.
+    deactivation_key = get_object_or_404(AuthenticationKey,
+                                         user=user,
+                                         key=key,
+                                         type='d',
+                                         used=False,
+                                         expires__gte=datetime.today())
 
     # If we got this far, the key is valid. Deactivate account
     # and set the used field on the key to True.
     user.is_active = False
     user.save()
-    key.used = True
-    key.save()
+    deactivation_key.used = True
+    deactivation_key.save()
 
     # If the user is logged in, log him out.
     logout(request)
