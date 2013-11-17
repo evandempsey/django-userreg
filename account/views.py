@@ -157,7 +157,7 @@ def recover_account(request, username, key):
     recovery_key = get_object_or_404(AuthenticationKey,
                                      user=user,
                                      key=key,
-                                     type='r',
+                                     key_type='r',
                                      used=False,
                                      expires__gte=datetime.today())
 
@@ -197,7 +197,7 @@ def activate_account(request, username, key):
     activation_key = get_object_or_404(AuthenticationKey,
                                        user=user,
                                        key=key,
-                                       type='a',
+                                       key_type='a',
                                        used=False,
                                        expires__gte=datetime.today())
 
@@ -253,7 +253,7 @@ def deactivate_account(request, username=None, key=None):
     deactivation_key = get_object_or_404(AuthenticationKey,
                                          user=user,
                                          key=key,
-                                         type='d',
+                                         key_type='d',
                                          used=False,
                                          expires__gte=datetime.today())
 

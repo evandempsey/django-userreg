@@ -13,6 +13,6 @@ class AuthenticationKey(models.Model):
     """
     user = models.ForeignKey(User)
     key = models.CharField(max_length=64)
-    type = models.CharField(max_length=1, choices=KEY_TYPE_CHOICES)
+    key_type = models.CharField(max_length=1, choices=KEY_TYPE_CHOICES)
     used = models.BooleanField()
     expires = models.DateField()
